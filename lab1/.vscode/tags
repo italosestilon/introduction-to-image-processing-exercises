@@ -1,0 +1,22 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+args	../filtering.py	/^args = parser.parse_args()$/;"	kind:variable	line:11
+filter	../filtering.py	/^def filter(image, kernel):$/;"	kind:function	line:17
+filtered_h3_h4	../filtering.py	/^filtered_h3_h4 = filter(image, np.sqrt(h3**2 + h4**2))$/;"	kind:variable	line:34
+filtering.py	../filtering.py	1;"	kind:file	line:1
+h1	../filtering.py	/^h1 = np.array([[0, 0, -1, 0, 0], [0, -1, -2, -1, 0], [-1, -2, 16, -2, -1], [0, -1, -2, -1, 0], [0, 0, -1, 0, 0]])$/;"	kind:variable	line:21
+h2	../filtering.py	/^h2 = (1.0\/256.0) * np.array([[1, 4, 6 , 4, 1], [4, 16, 24, 16, 4], [6, 24, 36, 24, 6], [4, 16, 24, 16, 4], [1, 4, 6 , 4, 1]])$/;"	kind:variable	line:22
+h3	../filtering.py	/^h3 = np.array([[-1, 0 , 1], [-2, 0, 2], [-1, 0, 1]])$/;"	kind:variable	line:23
+h4	../filtering.py	/^h4 = h3.transpose()$/;"	kind:variable	line:24
+high	../filtering.py	/^high = np.array([[0,-1, 0], [-1, 4, -1], [0, -1, 0]])$/;"	kind:variable	line:26
+image	../filtering.py	/^image = load_image(args.image_dir)$/;"	kind:variable	line:28
+image_filtered_h1	../filtering.py	/^image_filtered_h1 = filter(image_filtered_h2, high)$/;"	kind:variable	line:31
+image_filtered_h2	../filtering.py	/^image_filtered_h2 = filter(image, h2)$/;"	kind:variable	line:30
+image_filtered_h3	../filtering.py	/^image_filtered_h3 = filter(image, h3)$/;"	kind:variable	line:32
+image_filtered_h4	../filtering.py	/^image_filtered_h4 = filter(image, h4)$/;"	kind:variable	line:33
+load_image	../filtering.py	/^def load_image(dir):$/;"	kind:function	line:13
+parser	../filtering.py	/^parser = argparse.ArgumentParser()$/;"	kind:variable	line:9
