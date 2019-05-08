@@ -38,7 +38,8 @@ def dithering(f, mask, pattern, inverse_line=False, pattern_i=None):
             else:
                 g[i, j] = 0
             error = f[i, j] - g[i, j]
-            for (move_i, move_j), w in zip(pattern, mask):
+            _pattern = pattern if (not inverse_line) or (i % 2 != 0) else pattern_i
+            for (move_i, move_j), w in zip(_pattern, mask):
                 move_i += i
                 move_j += j
                 if(move_i < n and move_j < m):
@@ -66,21 +67,45 @@ def ordered_dithering(image, mask, l_max):
     return g
 
 
+def save_bpm(image, filename):
+    file = open(filename, 'w')
+
+    file.write('P4\n')
+    file.write('{} {}\n'.format(image.shape[0], image.shape[1]))
+    
+    n = image.shape[0]
+    m = image.shape[1]
+
+    for i in range(n):
+        for j in range(m):
+            file.write('{} '.format(image[i, j]))
+        file.write('\n')
+    file.close()
+
 image = load_image(args.image_dir)
 
 #print(image.astype(np.float).max())
 mask = [7.0/16, 3.0/16, 5.0/16, 1.0/16]
 pattern = [(0, 1), (1, -1), (1, 0), (1, 1)]
-g = dithering(image, mask, pattern, inverse_line=True)
+pattern_inverse = [(0, -1), (1, -1), (1, 0), (1, 1)]
+g = dithering(image, mask, pattern)
 io.imsave('error_difusion.png', g)
+
+g_inverse = dithering(image, mask, pattern, inverse_line=True,
+              pattern_i=pattern_inverse)
+io.imsave('error_difusion_inverse.png', g_inverse)
 
 bayer_mask = np.array([[6,8,4], [1,0,3], [5,2,7]])
 g_bayer = ordered_dithering(image, bayer_mask, 9)
 io.imsave('bayer_mask.png', g_bayer)
 
+bayer_mask_4 = np.array([[0, 12, 3, 15], [8, 4, 11, 7], [2, 14, 1, 13], [10, 6, 9, 5]])
+g_bayer_4 = ordered_dithering(image, bayer_mask_4, 16)
+io.imsave('bayer_mask_4.png', g_bayer_4)
+
 dispersed_mask = np.array([[1, 7, 8], [8, 5, 3], [6, 2, 9]])
 g_dispersed = ordered_dithering(image, dispersed_mask, 9)
 io.imsave('dispersed_mask.png', g_dispersed)
 
-#cv2.imwrite('dispersed_mask.pbm', g_dispersed)
-Image.fromarray(normalize_image(g_dispersed, 255).astype(np.uint8)).save('g.pbm')
+cv2.imwrite('dispersed_mask.pbm', g_dispersed)
+
