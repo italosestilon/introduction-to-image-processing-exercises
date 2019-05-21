@@ -64,18 +64,76 @@ def connected_components(image):
 
     return label_image, image, cc_number, proportion, transitions_h, transitions_v
 
-
 def segment_text(label, image, proportion, transitions_h, transitions_v):
     image = image.copy()
+    text_regions = []
     for i, region in enumerate(regionprops(label)):
         if((proportion[i] > 0.45 and proportion[i] < 0.9) and (transitions_h[i] <= 0.05 and transitions_v[i] < 0.1)):
             minr, minc, maxr, maxc = region.bbox
             rr, cc = rectangle_perimeter(
                 start=(minr, minc), end=(maxr, maxc), shape=image.shape)
             image[rr, cc] = True
-    
+            text_regions.append((minr, minc, maxr, maxc))
+    return image, text_regions
+
+def draw_retangles(image, label_image):
+    image = image.copy()
+
+    for region in regionprops(label_image):
+        minr, minc, maxr, maxc = region.bbox
+        rr, cc = rectangle_perimeter(
+            start=(minr, minc), end=(maxr, maxc), shape=image.shape)
+        image[rr, cc] = True
+
     return image
-        
+
+def segment_words(text_regions, image):
+    image = image.copy()
+    _image = np.full_like(image, False, dtype=np.bool)
+    for region in text_regions:
+        minr, minc, maxr, maxc = region
+        _image[minr:maxr, minc:maxc] = image[minr:maxr, minc:maxc]
+
+    save_image('_image.pbm', _image)
+
+    _image_dilation = dilation(_image, s_elem=np.ones((8, 10), dtype=np.uint8))
+    _image_erosion = erosion(_image_dilation, s_elem=np.ones((1, 10), dtype=np.uint8))
+
+    label_image, segment_with_retangles, _, _, _, _ = connected_components(_image_erosion)
+
+    _image_with_retangles = draw_retangles(image, label_image)
+    save_image('_imgage_segmented.pbm', _image_with_retangles)
+    return image
+
+def count_lines(text_regions, image):
+    image = image.copy()
+    _image = np.full_like(image, False, dtype=np.bool)
+    for region in text_regions:
+        minr, minc, maxr, maxc = region
+        _image[minr:maxr, minc:maxc] = image[minr:maxr, minc:maxc]
+    
+    #_image_dilation = dilation(_image, s_elem=np.ones((8, 130), dtype=np.uint8))
+    #_image_erosion = erosion(_image_dilation, s_elem=np.ones((8, 130), dtype=np.uint8))
+
+    #_image_dilation2 = dilation(_image, s_elem=np.ones((130, 1), dtype=np.uint8))
+    #_image_erosion2 = erosion(_image_dilation2, s_elem=np.ones((130, 1), dtype=np.uint8))
+
+    #_image_and = np.logical_and(_image_erosion, _image_erosion2)
+
+    #_image_closing = closing(_image_and, s_elem=np.ones((1, 30), dtype=np.uint8))
+    _image_closing = closing(_image, s_elem=np.ones((8, 130), dtype=np.uint8))
+    #save_image('lines.pbm', _image_closing)
+
+    save_image('lines.pbm', _image_closing)
+
+    label_image = label(_image_closing)
+    
+    lines_segmented = draw_retangles(image, label_image)
+    save_image('lines_segmented.pbm', lines_segmented)
+
+    number_of_lines = label_image.max()
+
+    return number_of_lines
 
 bitmap = load_image(args.image_dir)
 
@@ -103,14 +161,20 @@ save_image('bitmap_intersection.pbm', bitmap_intersection)
 
 save_image('bitmap_closing.pbm', bitmap_closing)
 
-label, cc_bitmap, cc_number, proportion, transitions_h, transitions_v = connected_components(
+label_image, cc_bitmap, cc_number, proportion, transitions_h, transitions_v = connected_components(
     bitmap_closing)
 
 save_image('cc_bitmap.pbm', cc_bitmap)
 
-bitmap_segmented = segment_text(label, bitmap, proportion, transitions_h, transitions_v)
+bitmap_segmented, text_regions = segment_text(label_image, bitmap, proportion, transitions_h, transitions_v)
 save_image('segmented.pbm', bitmap_segmented)
 
+words_segmented = segment_words(text_regions, bitmap)
+
+save_image('words_segmented.pbm', words_segmented)
+number_of_lines = count_lines(text_regions, bitmap)
+
+print("Number of lines {}".format(number_of_lines))
 #print(proportion)
 #print(transitions_h)
 #print(transitions_v)
