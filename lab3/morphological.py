@@ -16,21 +16,26 @@ def load_image(dir):
     image = io.imread(dir)
     return np.logical_not(image.astype(np.bool))
 
+
 def save_image(dir, image):
     image = np.logical_not(image).astype(np.uint8)
     cv2.imwrite(dir, image)
+
 
 def dilation(image, s_elem):
     out = binary_dilation(image, s_elem)
     return out
 
+
 def erosion(image, s_elem):
     out = binary_erosion(image, s_elem)
     return out
 
+
 def closing(image, s_elem):
     out = binary_closing(image, s_elem)
     return out
+
 
 def connected_components(image):
     image = image.copy()
@@ -38,32 +43,54 @@ def connected_components(image):
     cc_number = label_image.max()
 
     proportion = np.zeros(cc_number)
-    transitions_v = np.zeros(cc_number)
-    transitions_h = np.zeros(cc_number, dtype=np.int32)
+    transitions_v = np.zeros(cc_number, dtype=np.float)
+    transitions_h = np.zeros(cc_number, dtype=np.float)
 
     for i, region in enumerate(regionprops(label_image)):
         minr, minc, maxr, maxc = region.bbox
-        rr, cc = rectangle_perimeter(start=(minr, minc), end=(maxr, maxc), shape=image.shape)
-        proportion[i] = image[minr:maxr, minc:maxc].sum()/((maxr-minr)*(maxc-minc))
-        transitions_h[i] = np.count_nonzero(image[minr:maxr, minc: maxc-1] < image[minr:maxr, minc+1:maxc])
+        rr, cc = rectangle_perimeter(
+            start=(minr, minc), end=(maxr, maxc), shape=image.shape)
+        pixel_numbers = (maxr-minr)*(maxc-minc)
+        proportion[i] = image[minr:maxr, minc:maxc].sum()/(pixel_numbers)
+
+        transitions_h[i] = np.float(np.count_nonzero(
+            image[minr:maxr, minc: maxc-1] < image[minr:maxr, minc+1:maxc]))/pixel_numbers
+        transitions_v[i] = np.float(np.count_nonzero(np.transpose(
+            image[minr:maxr, minc: maxc-1]) < np.transpose(image[minr:maxr, minc+1:maxc])))/pixel_numbers
+
         #print(image[minr:maxr, minc: maxc-1])
         #transitions_v[i] = np.count_nonzero(image[])
         image[rr, cc] = True
 
-    print(transitions_h)
-    return image, cc_number, proportion
+    return label_image, image, cc_number, proportion, transitions_h, transitions_v
+
+
+def segment_text(label, image, proportion, transitions_h, transitions_v):
+    image = image.copy()
+    for i, region in enumerate(regionprops(label)):
+        if((proportion[i] > 0.45 and proportion[i] < 0.9) and (transitions_h[i] <= 0.05 and transitions_v[i] < 0.1)):
+            minr, minc, maxr, maxc = region.bbox
+            rr, cc = rectangle_perimeter(
+                start=(minr, minc), end=(maxr, maxc), shape=image.shape)
+            image[rr, cc] = True
+    
+    return image
+        
 
 bitmap = load_image(args.image_dir)
 
-bitmap_dilation_1 = dilation(bitmap, s_elem = np.ones((1, 100), dtype=np.uint8))
-bitmap_erosion_1 = erosion(bitmap_dilation_1, s_elem = np.ones((1, 100), dtype=np.uint8))
+bitmap_dilation_1 = dilation(bitmap, s_elem=np.ones((1, 100), dtype=np.uint8))
+bitmap_erosion_1 = erosion(
+    bitmap_dilation_1, s_elem=np.ones((1, 100), dtype=np.uint8))
 
-bitmap_dilation_2 = dilation(bitmap, s_elem = np.ones((200, 1), dtype=np.uint8))
-bitmap_erosion_2 = erosion(bitmap_dilation_2, s_elem = np.ones((200, 1), dtype=np.uint8))
+bitmap_dilation_2 = dilation(bitmap, s_elem=np.ones((200, 1), dtype=np.uint8))
+bitmap_erosion_2 = erosion(
+    bitmap_dilation_2, s_elem=np.ones((200, 1), dtype=np.uint8))
 
 bitmap_intersection = np.logical_and(bitmap_erosion_1, bitmap_erosion_2)
 
-bitmap_closing = closing(bitmap_intersection, s_elem=np.ones((1, 30), dtype=np.uint8))
+bitmap_closing = closing(
+    bitmap_intersection, s_elem=np.ones((1, 30), dtype=np.uint8))
 
 save_image('bitmap_dilation_1.pbm', bitmap_dilation_1)
 save_image('bitmap_erosion_1.pbm', bitmap_erosion_1)
@@ -76,11 +103,15 @@ save_image('bitmap_intersection.pbm', bitmap_intersection)
 
 save_image('bitmap_closing.pbm', bitmap_closing)
 
-
-cc_bitmap, cc_number, proportion = connected_components(bitmap_closing)
+label, cc_bitmap, cc_number, proportion, transitions_h, transitions_v = connected_components(
+    bitmap_closing)
 
 save_image('cc_bitmap.pbm', cc_bitmap)
 
-print(proportion)
+bitmap_segmented = segment_text(label, bitmap, proportion, transitions_h, transitions_v)
+save_image('segmented.pbm', bitmap_segmented)
 
+#print(proportion)
+#print(transitions_h)
+#print(transitions_v)
 #print(label_image.max())
