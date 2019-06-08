@@ -26,7 +26,11 @@ def apply_sift(image):
 
     return key_points
 
+def apply_surf(image, threshold=400):
+    surf = cv2.xfeatures2d.SURF_create(hessianThreshold=threshold)
+    key_points, descriptors = surf.detectAndCompute(image, None)
 
+    return key_points, descriptors
 #%%
 image1_dir = 'images/foto1A.jpg'
 image2_dir = 'images/foto1B.jpg'
@@ -38,6 +42,16 @@ key_points = apply_sift(gray_image1)
 
 #%%
 
-sift_image1 = cv2.drawKeypoints(gray_image1,key_points,image1)
+sift_image1 = cv2.drawKeypoints(gray_image1,key_points,image1, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 #%%
 io.imshow(sift_image1)
+
+#%%
+
+surf_keypoints, suft_descriptors = apply_surf(gray_image1, 5000)
+surf_image1 = cv2.drawKeypoints(gray_image1, surf_keypoints, None, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+
+#%%
+io.imshow(surf_image1)
+
+#%%
