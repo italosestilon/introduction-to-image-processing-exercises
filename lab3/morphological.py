@@ -58,8 +58,6 @@ def connected_components(image):
         transitions_v[i] = np.float(np.count_nonzero(np.transpose(
             image[minr:maxr, minc: maxc-1]) < np.transpose(image[minr:maxr, minc+1:maxc])))/pixel_numbers
 
-        #print(image[minr:maxr, minc: maxc-1])
-        #transitions_v[i] = np.count_nonzero(image[])
         image[rr, cc] = True
 
     return label_image, image, cc_number, proportion, transitions_h, transitions_v
@@ -94,18 +92,17 @@ def segment_words(text_regions, image):
         minr, minc, maxr, maxc = region
         _image[minr:maxr, minc:maxc] = image[minr:maxr, minc:maxc]
 
-    save_image('_image.pbm', _image)
+    save_image('image_only_text.pbm', _image)
 
     _image_dilation = dilation(_image, s_elem=np.ones((8, 12), dtype=np.uint8))
     _image_erosion = erosion(_image_dilation, s_elem=np.ones((8, 12), dtype=np.uint8))
 
-    label_image, segment_with_retangles, _, _, _, _ = connected_components(_image_erosion)
+    label_image, _, _, _, _, _ = connected_components(_image_erosion)
 
     _image_with_retangles = draw_retangles(image, label_image)
-    save_image('_imgage_segmented.pbm', _image_with_retangles)
 
     number_of_words = label_image.max()
-    return image, number_of_words
+    return _image_with_retangles, number_of_words
 
 def count_lines(text_regions, image):
     image = image.copy()
@@ -114,17 +111,7 @@ def count_lines(text_regions, image):
         minr, minc, maxr, maxc = region
         _image[minr:maxr, minc:maxc] = image[minr:maxr, minc:maxc]
     
-    #_image_dilation = dilation(_image, s_elem=np.ones((8, 130), dtype=np.uint8))
-    #_image_erosion = erosion(_image_dilation, s_elem=np.ones((8, 130), dtype=np.uint8))
-
-    #_image_dilation2 = dilation(_image, s_elem=np.ones((130, 1), dtype=np.uint8))
-    #_image_erosion2 = erosion(_image_dilation2, s_elem=np.ones((130, 1), dtype=np.uint8))
-
-    #_image_and = np.logical_and(_image_erosion, _image_erosion2)
-
-    #_image_closing = closing(_image_and, s_elem=np.ones((1, 30), dtype=np.uint8))
     _image_closing = closing(_image, s_elem=np.ones((8, 130), dtype=np.uint8))
-    #save_image('lines.pbm', _image_closing)
 
     save_image('lines.pbm', _image_closing)
 
@@ -133,52 +120,51 @@ def count_lines(text_regions, image):
     lines_segmented = draw_retangles(image, label_image)
     save_image('lines_segmented.pbm', lines_segmented)
 
-    #number_of_lines = label_image.max()
-
     return number_of_lines
 
 bitmap = load_image(args.image_dir)
 
+#step 1
 bitmap_dilation_1 = dilation(bitmap, s_elem=np.ones((1, 100), dtype=np.uint8))
+save_image('bitmap_dilation_1.pbm', bitmap_dilation_1)
+
+#step 2
 bitmap_erosion_1 = erosion(
     bitmap_dilation_1, s_elem=np.ones((1, 100), dtype=np.uint8))
-
-bitmap_dilation_2 = dilation(bitmap, s_elem=np.ones((200, 1), dtype=np.uint8))
-bitmap_erosion_2 = erosion(
-    bitmap_dilation_2, s_elem=np.ones((200, 1), dtype=np.uint8))
-
-bitmap_intersection = np.logical_and(bitmap_erosion_1, bitmap_erosion_2)
-
-bitmap_closing = closing(
-    bitmap_intersection, s_elem=np.ones((1, 30), dtype=np.uint8))
-
-save_image('bitmap_dilation_1.pbm', bitmap_dilation_1)
 save_image('bitmap_erosion_1.pbm', bitmap_erosion_1)
 
-
+#step 3
+bitmap_dilation_2 = dilation(bitmap, s_elem=np.ones((200, 1), dtype=np.uint8))
 save_image('bitmap_dilation_2.pbm', bitmap_dilation_2)
+
+#step 4
+bitmap_erosion_2 = erosion(
+    bitmap_dilation_2, s_elem=np.ones((200, 1), dtype=np.uint8))
 save_image('bitmap_erosion_2.pbm', bitmap_erosion_2)
 
+#step 5
+bitmap_intersection = np.logical_and(bitmap_erosion_1, bitmap_erosion_2)
 save_image('bitmap_intersection.pbm', bitmap_intersection)
 
+#step 6
+bitmap_closing = closing(
+    bitmap_intersection, s_elem=np.ones((1, 30), dtype=np.uint8))
 save_image('bitmap_closing.pbm', bitmap_closing)
 
+#step 7
 label_image, cc_bitmap, cc_number, proportion, transitions_h, transitions_v = connected_components(
     bitmap_closing)
 
 save_image('cc_bitmap.pbm', cc_bitmap)
 
+#step 8 and 9
 bitmap_segmented, text_regions = segment_text(label_image, bitmap, proportion, transitions_h, transitions_v)
-save_image('segmented.pbm', bitmap_segmented)
+save_image('image_segmented.pbm', bitmap_segmented)
 
+#step 10
 words_segmented, number_of_words = segment_words(text_regions, bitmap)
-
 save_image('words_segmented.pbm', words_segmented)
 number_of_lines = count_lines(text_regions, bitmap)
 
 print("Number of lines {}".format(number_of_lines))
 print("Number of words {}".format(number_of_words))
-#print(proportion)
-#print(transitions_h)
-#print(transitions_v)
-#print(label_image.max())
