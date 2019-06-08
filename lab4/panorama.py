@@ -22,14 +22,27 @@ def save_image(dir, image):
 
 def apply_sift(image):
     sift = cv2.xfeatures2d.SIFT_create()
-    key_points = sift.detect(image, None)
+    key_points, descriptors = sift.detectAndCompute(image, None)
 
-    return key_points
+    return key_points, descriptors
 
 def apply_surf(image, threshold=400):
     surf = cv2.xfeatures2d.SURF_create(hessianThreshold=threshold)
     key_points, descriptors = surf.detectAndCompute(image, None)
 
+    return key_points, descriptors
+
+def apply_brief(image, key_points):
+    brief = cv2.xfeatures2d.BriefDescriptorExtractor_create()
+    key_points, descriptors = brief.compute(image, key_points)
+
+    return key_points, descriptors
+
+def apply_orb(image):
+    orb = cv2.ORB_create()
+    key_points = orb.detect(image, None)
+
+    key_points, descriptors = orb.compute(image, key_points)
     return key_points, descriptors
 #%%
 image1_dir = 'images/foto1A.jpg'
@@ -53,5 +66,17 @@ surf_image1 = cv2.drawKeypoints(gray_image1, surf_keypoints, None, (255, 0, 0), 
 
 #%%
 io.imshow(surf_image1)
+
+#%%
+kp, des = apply_brief(image1, surf_keypoints)
+print(des.shape)
+#%%
+
+orb_keypoints, orb_descriptors = apply_orb(gray_image1)
+orb_image1 = cv2.drawKeypoints(gray_image1, orb_keypoints, None,
+                               (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+
+
+io.imshow(orb_image1)
 
 #%%
