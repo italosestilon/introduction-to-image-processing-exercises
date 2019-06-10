@@ -33,9 +33,10 @@ def apply_surf(image, threshold=400):
 
     return key_points, descriptors
 
-def apply_brief(image, key_points):
+def apply_brief(image):
+    kps, _= apply_sift(image)
     brief = cv2.xfeatures2d.BriefDescriptorExtractor_create()
-    key_points, descriptors = brief.compute(image, key_points)
+    key_points, descriptors = brief.compute(image, kps)
 
     return key_points, descriptors
 
@@ -97,42 +98,61 @@ def sift(image1, image2, gray_image1, gray_image2):
 
     panoramica(image1, image2, key_points, key_points2,
             descriptors, descriptors2, alg='SIFT')
-    surf_image1 = cv2.drawKeypoints(gray_image1, key_points, None, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-    surf_image2 = cv2.drawKeypoints(
+    sift_image1 = cv2.drawKeypoints(gray_image1, key_points, None, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    sift_image2 = cv2.drawKeypoints(
         gray_image2, key_points2, None, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
-    save_image('image1_sift.png', surf_image1)
-    save_image('image2_sift.png', surf_image2)
+    save_image('image1_sift.png', sift_image1)
+    save_image('image2_sift.png', sift_image2)
+
+def surf(image1, image2, gray_image1, gray_image2):
+    keypoints1, descriptors1 = apply_surf(gray_image1, threshold=1000)
+    keypoints2, descriptors2 = apply_surf(gray_image2, threshold=1000)
+
+    surf_image1 = cv2.drawKeypoints(gray_image1, keypoints1, None, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    surf_image2 = cv2.drawKeypoints(gray_image2, keypoints2, None, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+
+    save_image('image1_surf.png', surf_image1)
+    save_image('image2_surf.png', surf_image2)
+
+    panoramica(image1, image2, keypoints1, keypoints2, descriptors1, descriptors2, alg='SURF')
+
+
+def brief(image1, image2, gray_image1, gray_image2):
+    keypoints1, descriptors1 = apply_brief(gray_image1)
+    keypoints2, descriptors2 = apply_brief(gray_image2)
+
+    brief_image1 = cv2.drawKeypoints(gray_image1, keypoints1, None, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    brief_image2 = cv2.drawKeypoints(gray_image2, keypoints2, None, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+
+    save_image('image1_brief.png', brief_image1)
+    save_image('image2_brief.png', brief_image2)
+
+    panoramica(image1, image2, keypoints1, keypoints2, descriptors1, descriptors2, alg='BRIEF')
+
+def orb(image1, image2, gray_image1, gray_image2):
+    keypoints1, descriptors1 = apply_orb(gray_image1)
+    keypoints2, descriptors2 = apply_orb(gray_image2)
+
+    orb_image1 = cv2.drawKeypoints(gray_image1, keypoints1, None, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    orb_image2 = cv2.drawKeypoints(gray_image2, keypoints2, None, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+
+    save_image('image1_brief.png', orb_image1)
+    save_image('image2_surf.png', orb_image2)
+
+    panoramica(image1, image2, keypoints1, keypoints2, descriptors1, descriptors2, alg='ORB')
+
+
 
 image1_dir = args.image1
 image2_dir = args.image2
 image1, gray_image1 = load_image(image1_dir)
 image2, gray_image2 = load_image(image2_dir)
 
-
-
-
-
-#sift_image1 = cv2.drawKeypoints(gray_image1,key_points,image1, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-
-#io.imshow(sift_image1)
-
-
 sift(image1, image2, gray_image1, gray_image2)
 
-#io.imshow(surf_image1)
+surf(image1, image2, gray_image1, gray_image2)
 
+brief(image1, image2, gray_image1, gray_image2)
 
-#kp, des = apply_brief(image1, surf_keypoints)
-#print(des.shape)
-
-
-orb_keypoints, orb_descriptors = apply_orb(gray_image1)
-orb_image1 = cv2.drawKeypoints(gray_image1, orb_keypoints, None,
-                               (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-
-orb_keypoints2, orb_descriptors2 = apply_orb(gray_image2)
-print(orb_descriptors)
-
-save_image('image_1.png', image1)
-panoramica(image1, image2, orb_keypoints, orb_keypoints2, orb_descriptors, orb_descriptors2, alg='ORB')
+orb(image1, image2, gray_image1, gray_image2)
