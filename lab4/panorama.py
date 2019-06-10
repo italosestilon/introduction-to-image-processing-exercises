@@ -9,6 +9,10 @@ parser.add_argument('image1', help="Image1's directory")
 parser.add_argument('image2', help="Image2's directory")
 args = parser.parse_args()
 
+image1_dir = args.image1
+image2_dir = args.image2
+image1_name = image1_dir.split('/')[-1]
+image2_name = image2_dir.split('/')[-1]
 
 def load_image(dir):
     image = cv2.imread(dir)
@@ -78,81 +82,77 @@ def align_and_join_images(image1, image2, homography_matrix):
     result_image[0:h_2, 0:w_2] = image2
     return result_image
 
-def panoramica(image1, image2, keypoints1, keypoints2, descriptors1, descriptors2, alg):
+def panoramica(image1, image2, keypoints1, keypoints2, descriptors1, descriptors2, alg, image_name):
     matches = calculate_match(descriptors1, descriptors2)
     image_with_lines = draw_lines(
         image1.copy(), keypoints1, image2.copy(), keypoints2, matches[:45])
 
-    save_image('image_with_lines_{}.png'.format(alg), image_with_lines)
+    save_image('out/{}_with_lines_{}.jpg'.format(image_name, alg), image_with_lines)
 
     homography_matrix, mask = find_homography_matrix(
         keypoints1, keypoints2, matches[:45])
     print(len(matches))
     aligned_image = align_and_join_images(image1, image2, homography_matrix)
-    save_image('aligned_image_{}.png'.format(alg), aligned_image)
+    save_image('out/paranoramica_{}_{}.jpg'.format(image_name, alg), aligned_image)
 
-def sift(image1, image2, gray_image1, gray_image2):
+def sift(image1, image2, gray_image1, gray_image2, image1_name, image2_name):
     key_points, descriptors = apply_sift(gray_image1)
 
     key_points2, descriptors2 = apply_sift(gray_image2)
 
     panoramica(image1, image2, key_points, key_points2,
-            descriptors, descriptors2, alg='SIFT')
+            descriptors, descriptors2, alg='SIFT', image_name=image1_name[:5])
     sift_image1 = cv2.drawKeypoints(gray_image1, key_points, None, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
     sift_image2 = cv2.drawKeypoints(
         gray_image2, key_points2, None, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
-    save_image('image1_sift.png', sift_image1)
-    save_image('image2_sift.png', sift_image2)
+    save_image('out/{}_sift.jpg'.format(image1_name), sift_image1)
+    save_image('out/{}_sift.jpg'.format(image2_name), sift_image2)
 
-def surf(image1, image2, gray_image1, gray_image2):
-    keypoints1, descriptors1 = apply_surf(gray_image1, threshold=1000)
-    keypoints2, descriptors2 = apply_surf(gray_image2, threshold=1000)
+def surf(image1, image2, gray_image1, gray_image2, image1_name, image2_name):
+    keypoints1, descriptors1 = apply_surf(gray_image1, threshold=10000)
+    keypoints2, descriptors2 = apply_surf(gray_image2, threshold=10000)
 
     surf_image1 = cv2.drawKeypoints(gray_image1, keypoints1, None, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
     surf_image2 = cv2.drawKeypoints(gray_image2, keypoints2, None, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
-    save_image('image1_surf.png', surf_image1)
-    save_image('image2_surf.png', surf_image2)
+    save_image('out/{}_surf.jpg'.format(image1_name), surf_image1)
+    save_image('out/{}_surf.jpg'.format(image2_name), surf_image2)
 
-    panoramica(image1, image2, keypoints1, keypoints2, descriptors1, descriptors2, alg='SURF')
+    panoramica(image1, image2, keypoints1, keypoints2, descriptors1, descriptors2, alg='SURF', image_name=image1_name[:5])
 
 
-def brief(image1, image2, gray_image1, gray_image2):
+def brief(image1, image2, gray_image1, gray_image2, image1_name, image2_name):
     keypoints1, descriptors1 = apply_brief(gray_image1)
     keypoints2, descriptors2 = apply_brief(gray_image2)
 
     brief_image1 = cv2.drawKeypoints(gray_image1, keypoints1, None, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
     brief_image2 = cv2.drawKeypoints(gray_image2, keypoints2, None, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
-    save_image('image1_brief.png', brief_image1)
-    save_image('image2_brief.png', brief_image2)
+    save_image('out/{}_brief.jpg'.format(image1_name), brief_image1)
+    save_image('out/{}_brief.jpg'.format(image2_name), brief_image2)
 
-    panoramica(image1, image2, keypoints1, keypoints2, descriptors1, descriptors2, alg='BRIEF')
+    panoramica(image1, image2, keypoints1, keypoints2, descriptors1, descriptors2, alg='BRIEF', image_name=image1_name[:5])
 
-def orb(image1, image2, gray_image1, gray_image2):
+def orb(image1, image2, gray_image1, gray_image2, image1_name, image2_name):
     keypoints1, descriptors1 = apply_orb(gray_image1)
     keypoints2, descriptors2 = apply_orb(gray_image2)
 
     orb_image1 = cv2.drawKeypoints(gray_image1, keypoints1, None, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
     orb_image2 = cv2.drawKeypoints(gray_image2, keypoints2, None, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
-    save_image('image1_brief.png', orb_image1)
-    save_image('image2_surf.png', orb_image2)
+    save_image('out/{}_brief.jpg'.format(image1_name), orb_image1)
+    save_image('out/{}_surf.jpg'.format(image2_name), orb_image2)
 
-    panoramica(image1, image2, keypoints1, keypoints2, descriptors1, descriptors2, alg='ORB')
+    panoramica(image1, image2, keypoints1, keypoints2, descriptors1, descriptors2, alg='ORB', image_name=image1_name[:5])
 
-
-
-image1_dir = args.image1
-image2_dir = args.image2
 image1, gray_image1 = load_image(image1_dir)
 image2, gray_image2 = load_image(image2_dir)
 
-sift(image1, image2, gray_image1, gray_image2)
+sift(image1, image2, gray_image1, gray_image2, image1_name, image2_name)
 
-surf(image1, image2, gray_image1, gray_image2)
+surf(image1, image2, gray_image1, gray_image2, image1_name, image2_name)
 
-brief(image1, image2, gray_image1, gray_image2)
+brief(image1, image2, gray_image1, gray_image2, image1_name, image2_name)
 
-orb(image1, image2, gray_image1, gray_image2)
+orb(image1, image2, gray_image1, gray_image2, image1_name, image2_name)
