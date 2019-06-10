@@ -90,6 +90,19 @@ def panoramica(image1, image2, keypoints1, keypoints2, descriptors1, descriptors
     aligned_image = align_and_join_images(image1, image2, homography_matrix)
     save_image('aligned_image_{}.png'.format(alg), aligned_image)
 
+def sift(image1, image2, gray_image1, gray_image2):
+    key_points, descriptors = apply_sift(gray_image1)
+
+    key_points2, descriptors2 = apply_sift(gray_image2)
+
+    panoramica(image1, image2, key_points, key_points2,
+            descriptors, descriptors2, alg='SIFT')
+    surf_image1 = cv2.drawKeypoints(gray_image1, key_points, None, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    surf_image2 = cv2.drawKeypoints(
+        gray_image2, key_points2, None, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+
+    save_image('image1_sift.png', surf_image1)
+    save_image('image2_sift.png', surf_image2)
 
 image1_dir = args.image1
 image2_dir = args.image2
@@ -97,14 +110,7 @@ image1, gray_image1 = load_image(image1_dir)
 image2, gray_image2 = load_image(image2_dir)
 
 
-key_points, descriptors = apply_sift(gray_image1)
-key_points2, descriptors2 = apply_sift(gray_image2)
 
-print('1',descriptors2)
-print('2',descriptors)
-
-panoramica(image1, image2, key_points, key_points2,
-           descriptors, descriptors2, alg='SIFT')
 
 
 #sift_image1 = cv2.drawKeypoints(gray_image1,key_points,image1, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
@@ -112,13 +118,7 @@ panoramica(image1, image2, key_points, key_points2,
 #io.imshow(sift_image1)
 
 
-
-surf_keypoints, suft_descriptors = apply_surf(gray_image1, 5000)
-surf_keypoints2, suft_descriptors2 = apply_surf(gray_image2, 5000)
-#surf_image1 = cv2.drawKeypoints(gray_image1, surf_keypoints, None, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-
-panoramica(image1, image2, surf_keypoints, surf_keypoints2,
-           suft_descriptors, suft_descriptors2, alg='SURF')
+sift(image1, image2, gray_image1, gray_image2)
 
 #io.imshow(surf_image1)
 
