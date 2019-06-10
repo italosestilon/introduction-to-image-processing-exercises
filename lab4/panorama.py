@@ -113,9 +113,12 @@ panoramica(image1, image2, key_points, key_points2,
 
 
 
-#surf_keypoints, suft_descriptors = apply_surf(gray_image1, 5000)
+surf_keypoints, suft_descriptors = apply_surf(gray_image1, 5000)
+surf_keypoints2, suft_descriptors2 = apply_surf(gray_image2, 5000)
 #surf_image1 = cv2.drawKeypoints(gray_image1, surf_keypoints, None, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
+panoramica(image1, image2, surf_keypoints, surf_keypoints2,
+           suft_descriptors, suft_descriptors2, alg='SURF')
 
 #io.imshow(surf_image1)
 
