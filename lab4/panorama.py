@@ -53,7 +53,6 @@ def apply_orb(image):
 
 def calculate_match(descriptors1, descriptors2, norm=cv2.NORM_L1, cross_check=False):
     bf_matcher = cv2.BFMatcher_create(normType=norm, crossCheck=cross_check)
-    raw_matches = bf_matcher.knnMatch(descriptors1, descriptors2, 2)
     matches = bf_matcher.match(descriptors1, descriptors2)
     #matches = []
     #for match in raw_matches:
@@ -141,18 +140,18 @@ def orb(image1, image2, gray_image1, gray_image2, image1_name, image2_name):
     orb_image1 = cv2.drawKeypoints(gray_image1, keypoints1, None, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
     orb_image2 = cv2.drawKeypoints(gray_image2, keypoints2, None, (255, 0, 0), flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
-    save_image('out/{}_brief.jpg'.format(image1_name), orb_image1)
-    save_image('out/{}_surf.jpg'.format(image2_name), orb_image2)
+    save_image('out/{}_orb.jpg'.format(image1_name), orb_image1)
+    save_image('out/{}_orb.jpg'.format(image2_name), orb_image2)
 
     panoramica(image1, image2, keypoints1, keypoints2, descriptors1, descriptors2, alg='ORB', image_name=image1_name[:5])
 
 image1, gray_image1 = load_image(image1_dir)
 image2, gray_image2 = load_image(image2_dir)
 
-sift(image1, image2, gray_image1, gray_image2, image1_name, image2_name)
+sift(image1, image2, gray_image1, gray_image2, image1_name[:6], image2_name[:6])
 
-surf(image1, image2, gray_image1, gray_image2, image1_name, image2_name)
+surf(image1, image2, gray_image1, gray_image2, image1_name[:6], image2_name[:6])
 
-brief(image1, image2, gray_image1, gray_image2, image1_name, image2_name)
+brief(image1, image2, gray_image1, gray_image2, image1_name[:6], image2_name[:6])
 
-orb(image1, image2, gray_image1, gray_image2, image1_name, image2_name)
+orb(image1, image2, gray_image1, gray_image2, image1_name[:6], image2_name[:6])
