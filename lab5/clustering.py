@@ -1,8 +1,13 @@
 
+import matplotlib.pyplot as plt
 import numpy as np
 from skimage import io, img_as_float, img_as_int
 from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
 import argparse
+
+import matplotlib.pyplot as plt
 
 parser = argparse.ArgumentParser()
 parser.add_argument('image', help="Image1's directory")
@@ -15,17 +20,45 @@ def load_image(dir):
 def save_image(dir, image):
     io.imsave(dir, image)
 
-def clustering(image, num_clusters):
+def visualize_image(image):
+    image_shape = image.shape
+    image_as_points = image.reshape(image_shape[0] * image_shape[1], 3)
+
+    pca = PCA(n_components=2)
+    pca.fit(image_as_points)
+
+    image_as_points_reduced = pca.transform(image_as_points)
+    print(image_as_points_reduced[:,1:2].shape)
+    plt.plot(image_as_points_reduced[:, 0:1], image_as_points_reduced[:, 1:2], 'ro')
+    plt.savefig('viz.png')
+
+def plot_cluster(X, centers, labels, k, image_name):
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    pca = TSNE(n_components=2)
+    X_r =pca.fit_transform(X)
+    x = X_r[:,0:1].flatten()
+    y = X_r[:, 1:2].flatten()
+    
+    scatter = ax.scatter(x, y, c=labels, s=50)
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+
+    plt.savefig('out/viz_{}_{}'.format(k, image_name))
+
+def clustering(image, num_clusters, image_name):
     image_shape = image.shape
     image_as_points = image.reshape(image_shape[0] * image_shape[1], 3)
 
     kmeans = KMeans(n_clusters=num_clusters, random_state=0).fit(image_as_points)
     centers = kmeans.cluster_centers_
     predict = kmeans.predict(image_as_points)
-
     new_image = centers[predict]
     new_image = new_image.reshape(image_shape)
 
+    print("Number of elements for cluster", np.bincount(predict))
+    
+    plot_cluster(image_as_points, centers, predict, k, image_name)
     return new_image
 
 
@@ -34,8 +67,10 @@ image_name = image_dir.split('/')[-1]
 
 image = load_image(image_dir)
 
-new_image = clustering(image, 5)
+visualize_image(image)
 
-save_image('new_image.png', new_image)
+for k in [2, 8, 16, 32, 64, 128]:
+    new_image = clustering(image, k, image_name)
+    save_image('out/{}_{}.png'.format(image_name.split(".")[0], k), new_image)
 
 
