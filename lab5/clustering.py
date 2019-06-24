@@ -20,7 +20,7 @@ def load_image(dir):
 def save_image(dir, image):
     io.imsave(dir, image)
 
-def visualize_image(image):
+def visualize_image(image, image_name):
     image_shape = image.shape
     image_as_points = image.reshape(image_shape[0] * image_shape[1], 3)
 
@@ -29,8 +29,12 @@ def visualize_image(image):
 
     image_as_points_reduced = pca.transform(image_as_points)
     print(image_as_points_reduced[:,1:2].shape)
-    plt.plot(image_as_points_reduced[:, 0:1], image_as_points_reduced[:, 1:2], 'ro')
-    plt.savefig('viz.png')
+    x = image_as_points_reduced[:, 0:1].flatten()
+    y = image_as_points_reduced[:, 1:2].flatten()
+    print(x)
+    print(y)
+    plt.scatter(x, y, s=10, c='r', marker='o')
+    plt.savefig('out/viz_{}'.format(image_name))
 
 def plot_cluster(X, centers, labels, k, image_name):
     fig = plt.figure()
@@ -40,7 +44,7 @@ def plot_cluster(X, centers, labels, k, image_name):
     x = X_r[:,0:1].flatten()
     y = X_r[:, 1:2].flatten()
     
-    scatter = ax.scatter(x, y, c=labels, s=50)
+    scatter = ax.scatter(x, y, c=labels, s=10)
     ax.set_xlabel('x')
     ax.set_ylabel('y')
     plt.colorbar(scatter)
@@ -56,10 +60,10 @@ def clustering(image, num_clusters, image_name):
     new_image = centers[predict]
     new_image = new_image.reshape(image_shape)
 
-    sihlhouette = silhouette_score(image_as_points, predict)
-    print("clustering with {} clusters and silhouette {}".format(k, sihlhouette))
+    #sihlhouette = silhouette_score(image_as_points, predict)
+    #print("clustering with {} clusters and silhouette {}".format(k, sihlhouette))
     
-    #plot_cluster(image_as_points, centers, predict, k, image_name)
+    plot_cluster(image_as_points, centers, predict, k, image_name)
     return new_image
 
 
@@ -68,9 +72,9 @@ image_name = image_dir.split('/')[-1]
 
 image = load_image(image_dir)
 
-visualize_image(image)
+visualize_image(image, image_name)
 
-for k in [2, 8, 16, 32, 64, 128]:
+for k in [2]:
     new_image = clustering(image, k, image_name)
     save_image('out/{}_{}.png'.format(image_name.split(".")[0], k), new_image)
 
