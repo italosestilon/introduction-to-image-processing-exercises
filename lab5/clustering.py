@@ -4,7 +4,7 @@ import numpy as np
 from skimage import io, img_as_float, img_as_int
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
-from sklearn.manifold import TSNE
+from sklearn.metrics import silhouette_score
 import argparse
 
 import matplotlib.pyplot as plt
@@ -35,7 +35,7 @@ def visualize_image(image):
 def plot_cluster(X, centers, labels, k, image_name):
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    pca = TSNE(n_components=2)
+    pca = PCA(n_components=2)
     X_r =pca.fit_transform(X)
     x = X_r[:,0:1].flatten()
     y = X_r[:, 1:2].flatten()
@@ -43,7 +43,7 @@ def plot_cluster(X, centers, labels, k, image_name):
     scatter = ax.scatter(x, y, c=labels, s=50)
     ax.set_xlabel('x')
     ax.set_ylabel('y')
-
+    plt.colorbar(scatter)
     plt.savefig('out/viz_{}_{}'.format(k, image_name))
 
 def clustering(image, num_clusters, image_name):
@@ -56,9 +56,10 @@ def clustering(image, num_clusters, image_name):
     new_image = centers[predict]
     new_image = new_image.reshape(image_shape)
 
-    print("Number of elements for cluster", np.bincount(predict))
+    sihlhouette = silhouette_score(image_as_points, predict)
+    print("clustering with {} clusters and silhouette {}".format(k, sihlhouette))
     
-    plot_cluster(image_as_points, centers, predict, k, image_name)
+    #plot_cluster(image_as_points, centers, predict, k, image_name)
     return new_image
 
 
