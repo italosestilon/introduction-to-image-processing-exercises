@@ -1,0 +1,43 @@
+Clusteing image monalisa.png in 2 clusters
+/home/estilon/anaconda3/envs/image/lib/python3.7/site-packages/skimage/util/dtype.py:135: UserWarning: Possible precision loss when converting from float64 to uint8
+  .format(dtypeobj_in, dtypeobj_out))
+/home/estilon/anaconda3/envs/image/lib/python3.7/site-packages/skimage/util/dtype.py:135: UserWarning: Possible precision loss when converting from float64 to uint8
+  .format(dtypeobj_in, dtypeobj_out))
+/home/estilon/anaconda3/envs/image/lib/python3.7/site-packages/skimage/util/dtype.py:135: UserWarning: Possible precision loss when converting from float64 to uint8
+  .format(dtypeobj_in, dtypeobj_out))
+/home/estilon/anaconda3/envs/image/lib/python3.7/site-packages/skimage/util/dtype.py:135: UserWarning: Possible precision loss when converting from float64 to uint8
+  .format(dtypeobj_in, dtypeobj_out))
+/home/estilon/anaconda3/envs/image/lib/python3.7/site-packages/skimage/util/dtype.py:135: UserWarning: Possible precision loss when converting from float64 to uint8
+  .format(dtypeobj_in, dtypeobj_out))
+/home/estilon/anaconda3/envs/image/lib/python3.7/site-packages/skimage/util/dtype.py:135: UserWarning: Possible precision loss when converting from float64 to uint8
+  .format(dtypeobj_in, dtypeobj_out))
+Saving codebook
+Saving encoded image
+clustering with 2 clusters and silhouette 0.6331891839486036
+Decoding image
+Clusteing image monalisa.png in 8 clusters
+Saving codebook
+Saving encoded image
+clustering with 8 clusters and silhouette 0.4063097324693404
+Decoding image
+Clusteing image monalisa.png in 16 clusters
+Saving codebook
+Saving encoded image
+clustering with 16 clusters and silhouette 0.3572240804795287
+Decoding image
+Clusteing image monalisa.png in 32 clusters
+Saving codebook
+Saving encoded image
+clustering with 32 clusters and silhouette 0.30077159375374024
+Decoding image
+Clusteing image monalisa.png in 64 clusters
+Saving codebook
+Saving encoded image
+clustering with 64 clusters and silhouette 0.27257568354518263
+Decoding image
+Clusteing image monalisa.png in 128 clusters
+Saving codebook
+Saving encoded image
+clustering with 128 clusters and silhouette 0.2569245622904694
+Decoding image
+Clusteing image watch.png in 2 clusters

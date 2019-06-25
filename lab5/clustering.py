@@ -77,8 +77,8 @@ def clustering(image_as_points, image_shape, num_clusters, image_name, image_as_
 
     sihlhouette = silhouette_score(image_as_points, predict, n_jobs=-1)
 
-    with open('{}_silhouette.txt'.format(image_name.split('.')[0]), 'a') as f:
-        f.append("clustering with {} clusters and silhouette {}".format(k, sihlhouette))
+    with open('out/{}_silhouette.txt'.format(image_name.split('.')[0]), 'a') as f:
+        f.write("clustering with {} clusters and silhouette {}\n".format(k, sihlhouette))
         
     print("clustering with {} clusters and silhouette {}".format(k, sihlhouette))
     

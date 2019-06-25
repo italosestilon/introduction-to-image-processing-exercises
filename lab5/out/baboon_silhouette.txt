@@ -1,0 +1,7 @@
+
+clustering with 2 clusters and silhouette 0.4004498212069274
+clustering with 8 clusters and silhouette 0.3554376245969658
+clustering with 16 clusters and silhouette 0.31253160112359846
+clustering with 32 clusters and silhouette 0.28020107705184466
+clustering with 64 clusters and silhouette 0.25023911311219205
+clustering with 128 clusters and silhouette 0.2370087716286568
